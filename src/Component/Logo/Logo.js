@@ -8,8 +8,8 @@ const Logo = () =>
     return(
     <div className="pa3">
         <Tilt>
-            <div className="h4 w4 br-100 bg-gray tc pa3">
-            <h1>Tilt 👀</h1>
+            <div className="h4 w4 br-100 ba bw1 bg-gray tc pa3">
+                <h1>Dirga</h1>
             </div>
         </Tilt>
     </div>
