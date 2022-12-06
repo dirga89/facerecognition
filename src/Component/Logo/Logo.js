@@ -1,10 +1,8 @@
-import { logDOM } from '@testing-library/react';
 import React from 'react';
 import Tilt from 'react-parallax-tilt';
 
 const Logo = () =>
 {
-    const [scale, setScale] = React.useState(1.15);
     return(
     <div className="pa3">
         <Tilt>
