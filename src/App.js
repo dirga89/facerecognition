@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
-// import Clarifai from 'clarifai';
 import ParticlesBg from 'particles-bg';
 import Navigation from './Component/Navigation/Navigation';
+import SignIn from  './Component/SignIn/SignIn';
+import Register from './Component/Register/Register';
 import Logo from './Component/Logo/Logo';
 import Rank from './Component/Rank/Rank';
 import ImageLinkForm from './Component/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Component/FaceRecognition/FaceRecognition';
 
-// const app = new Clarifai.App({
-//  apiKey: '496cd0e28de54967a811c97f89177c1c'
-// });
 class App extends Component
 {
     constructor()
@@ -20,6 +18,7 @@ class App extends Component
             input: '',
             imageUrl: '',
             box: {},
+            route: 'signin',
         }
     }
 
@@ -41,7 +40,6 @@ class App extends Component
     {
         
         this.setState({box: box});
-        console.log(box);
     }
 
     onInputChange = (event) =>
@@ -113,28 +111,48 @@ class App extends Component
             .then((response) => response.json())
             .then((result) =>
             {
+                console.log(result);
                 this.displayFaceBox(this.calculateFaceLocation(result));
             }
             )
             .catch((error) => console.log("error", error));
     }
 
+    onRouteChange = (route) =>
+    {
+        this.setState({route: route});
+    }
+
     render()
     {
         return(
             <div className="App">
-                <ParticlesBg type="cobweb" bg={true} color="#888888" />
-                <Navigation />
-                <Logo />
-                <Rank />
-                <ImageLinkForm 
-                    onInputChange={this.onInputChange} 
-                    onButtonSubmit={this.onSubmit} 
-                />
-                <FaceRecognition 
-                    imageUrl={this.state.imageUrl} 
-                    box={this.state.box}
-                />
+                <ParticlesBg className="particles" type="cobweb" bg={true} color="#888888" />
+                <Navigation onRouteChange={this.onRouteChange} />
+                {   
+                    this.state.route === 'home'
+                    ?
+                        <>
+                            <Logo />
+                            <Rank />
+                            <ImageLinkForm 
+                                onInputChange={this.onInputChange} 
+                                onButtonSubmit={this.onSubmit} 
+                            />
+                            <FaceRecognition 
+                                imageUrl={this.state.imageUrl} 
+                                box={this.state.box}
+                            />
+                        </>
+                    :
+                    (
+                        this.state.route === 'register'
+                        ?
+                        <Register />
+                        :
+                        <SignIn onRouteChange={this.onRouteChange} />
+                    )
+                }
             </div>
         );
     }
