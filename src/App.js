@@ -8,6 +8,7 @@ import Logo from './Component/Logo/Logo';
 import Rank from './Component/Rank/Rank';
 import ImageLinkForm from './Component/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Component/FaceRecognition/FaceRecognition';
+// import Footer from './Component/Footer/Footer';
 
 class App extends Component
 {
@@ -19,6 +20,7 @@ class App extends Component
             imageUrl: '',
             box: {},
             route: 'signin',
+            isSignedIn: false,
         }
     }
 
@@ -120,6 +122,15 @@ class App extends Component
 
     onRouteChange = (route) =>
     {
+        if(route === 'home')
+        {
+            this.setState({isSignedIn: true});
+        }
+        else
+        {
+            this.setState({isSignedIn: false});
+        }
+
         this.setState({route: route});
     }
 
@@ -128,7 +139,10 @@ class App extends Component
         return(
             <div className="App">
                 <ParticlesBg className="particles" type="cobweb" bg={true} color="#888888" />
-                <Navigation onRouteChange={this.onRouteChange} />
+                <Navigation 
+                    onRouteChange={this.onRouteChange} 
+                    isSignedIn={this.state.isSignedIn}
+                />
                 {   
                     this.state.route === 'home'
                     ?
@@ -153,6 +167,7 @@ class App extends Component
                         <SignIn onRouteChange={this.onRouteChange} />
                     )
                 }
+                {/* <Footer /> */}
             </div>
         );
     }
