@@ -25,7 +25,7 @@ class SignIn extends React.Component
     onSubmitSignIn = (event) =>
     {
         //event.preventDefault();
-        fetch('http://localhost:4000/signin', {
+        fetch('https://sleepy-eyrie-76276.herokuapp.com/signin', {
             method: 'post',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -33,34 +33,19 @@ class SignIn extends React.Component
                 password: this.state.signInPassword
             })
         })
-            // .then(async (response) =>{
-            //     let data = await response.json();
-            //     if(data.status === 200){
-            //         console.log(data);
-            //         this.props.loadUser(data);
-            //         this.props.onRouteChange('home');
-            //     }else{
-            //         console.log("else");
-            //         console.log(data);
-            //     }
-            // })
-            // .catch((err) => {
-            //     console.log(err);
-            // })
-
-            .then(response => {
-                if(response.ok) {
-                    return response.json();
-                }
-                return Promise.reject(response);
-            })
-            .then(user => {
-                this.props.loadUser(user);
-                this.props.onRouteChange('home');
-            })
-            .catch((error) => {
-                console.log('Something went wrong.', error);
-            })
+        .then(response => {
+            if(response.ok) {
+                return response.json();
+            }
+            return Promise.reject(response);
+        })
+        .then(user => {
+            this.props.loadUser(user);
+            this.props.onRouteChange('home');
+        })
+        .catch((error) => {
+            console.log('Something went wrong.', error);
+        })
     }
 
     render()

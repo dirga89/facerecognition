@@ -10,26 +10,27 @@ import ImageLinkForm from './Component/ImageLinkForm/ImageLinkForm';
 import FaceRecognition from './Component/FaceRecognition/FaceRecognition';
 // import Footer from './Component/Footer/Footer';
 
+const initialState = {
+    input: '',
+    imageUrl: '',
+    box: [{}],
+    route: 'signin',
+    isSignedIn: false,
+    user: {
+        id: '',
+        name: '',
+        email: '',
+        password: '',
+        entries: 0,
+        joined: new Date()
+    }
+}
 class App extends Component
 {
     constructor()
     {
         super();
-        this.state = {
-            input: '',
-            imageUrl: '',
-            box: {},
-            route: 'signin',
-            isSignedIn: false,
-            user: {
-                id: '',
-                name: '',
-                email: '',
-                password: '',
-                entries: 0,
-                joined: new Date()
-            }
-        }
+        this.state = initialState;
     }
 
     componentDidMount() 
@@ -53,16 +54,20 @@ class App extends Component
 
     calculateFaceLocation = (data) =>
     {
-        const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
         const image = document.getElementById('inputImage');
         const width = Number(image.width);
         const height = Number(image.height);
-        return{
-            leftCol: clarifaiFace.left_col * width,
-            topRow: clarifaiFace.top_row * height,
-            rightCol: width - (clarifaiFace.right_col * width),
-            bottomRow: height - (clarifaiFace.bottom_row * height)
-        };
+
+        //const clarifaiFace = data.outputs[0].data.regions[0].region_info.bounding_box;
+        const clarifaiFace = data.outputs[0].data.regions;
+        return clarifaiFace.map(region => {
+            return{
+                leftCol: region.region_info.bounding_box.left_col * width,
+                topRow: region.region_info.bounding_box.top_row * height,
+                rightCol: width - (region.region_info.bounding_box.right_col * width),
+                bottomRow: height - (region.region_info.bounding_box.bottom_row * height)
+            };
+        })
     }
 
     displayFaceBox = (box) =>
@@ -79,83 +84,33 @@ class App extends Component
     {
         this.setState({imageUrl: this.state.input});
 
-
-        //help me => user_id can be found in multiple ways, one way is in https://portal.clarifai.com/settings/profile 
-        const USER_ID = "soelak";
-
-        
-        // Your PAT (Personal Access Token) can be found in the portal under Authentification
-        // help me => PAT can be found in https://portal.clarifai.com/settings/authentication (create one if necessary!)
-        const PAT = "496cd0e28de54967a811c97f89177c1c"; 
-        
-        
-        // help me => App Id is just the name of your app on the portal. 
-        const APP_ID = "my-first-application"; 
-
-
-        // Change these to whatever model and image input you want to use
-        // help me => https://help.clarifai.com/hc/en-us/articles/1500007677141-Where-to-find-your-Model-IDs-and-Model-Version-IDs
-        const MODEL_ID = "face-detection";
-        const MODEL_VERSION_ID = "45fb9a671625463fa646c3523a3087d5";
-
-        const IMAGE_URL = this.state.input;
-
-        ///////////////////////////////////////////////////////////////////////////////////
-        // YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-        ///////////////////////////////////////////////////////////////////////////////////
-        const raw = JSON.stringify({
-            user_app_id: {
-            user_id: USER_ID,
-            app_id: APP_ID,
-            },
-            inputs: [
-            {
-                data: {
-                image: {
-                    url: IMAGE_URL,
-                },
-                },
-            },
-            ],
-        });
-
-        const requestOptions = {
-            method: "POST",
-            headers: {
-            Accept: "application/json",
-            Authorization: "Key " + PAT,
-            },
-            body: raw,
-        };
-
-        fetch(
-            "https://api.clarifai.com/v2/models/" +
-            MODEL_ID +
-            "/versions/" +
-            MODEL_VERSION_ID +
-            "/outputs",
-            requestOptions
-        )
-            .then((response) => response.json())
-            .then((result) =>
-            {
-                if(result){
-                    fetch('http://localhost:4000/image', {
-                        method: 'put',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            id: this.state.user.id
-                        })
+        fetch('https://sleepy-eyrie-76276.herokuapp.com/imageapi', {
+            method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                input: this.state.input
+            })
+        })
+        .then((response) => response.json())
+        .then((result) =>
+        {
+            if(result){
+                fetch('https://sleepy-eyrie-76276.herokuapp.com/image', {
+                    method: 'put',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id: this.state.user.id
                     })
-                        .then(res => res.json())
-                        .then(count => {
-                            this.setState(Object.assign(this.state.user, {entries: count}));
-                        })
-                }
-                this.displayFaceBox(this.calculateFaceLocation(result));
+                })
+                .then(res => res.json())
+                .then(count => {
+                    this.setState(Object.assign(this.state.user, {entries: count}));
+                })
             }
-            )
-            .catch((error) => console.log("error", error));
+            this.displayFaceBox(this.calculateFaceLocation(result));
+        }
+        )
+        .catch((error) => console.log("error", error));
     }
 
     onRouteChange = (route) =>
@@ -166,7 +121,7 @@ class App extends Component
         }
         else
         {
-            this.setState({isSignedIn: false});
+            this.setState(initialState);
         }
 
         this.setState({route: route});
